@@ -34,7 +34,6 @@
 (defparameter *cols* (array-dimension *grid* 1))
 
 ;; PART 1
-
 (defun valid-index (i j)
   (and (>= i 0) (>= j 0) (< i *rows*) (< j *cols*)))
 
@@ -42,10 +41,10 @@
   `(defun ,name (i j)
      (when (valid-index (+ i (* ,delta-i 3)) (+ j (* ,delta-j 3)))
            (let ((result (list
-                           (aref *grid* i j)
-                           (aref *grid* (+ i (* ,delta-i 1)) (+ j (* ,delta-j 1)))
-                           (aref *grid* (+ i (* ,delta-i 2)) (+ j (* ,delta-j 2)))
-                           (aref *grid* (+ i (* ,delta-i 3)) (+ j (* ,delta-j 3))))))
+                          (aref *grid* i j)
+                          (aref *grid* (+ i (* ,delta-i 1)) (+ j (* ,delta-j 1)))
+                          (aref *grid* (+ i (* ,delta-i 2)) (+ j (* ,delta-j 2)))
+                          (aref *grid* (+ i (* ,delta-i 3)) (+ j (* ,delta-j 3))))))
              (if (equal result '(X M A S)) 1 0)))))
 
 (define-check-function check-right 0 1)
@@ -63,33 +62,27 @@
       (loop for i from 0 below n do
         (loop for j from 0 below m do
           (when (equal (aref *grid* i j) 'X)
-            (let ((result (+ (or (check-right i j) 0)
-                             (or (check-left i j) 0)
-                             (or (check-down i j) 0)
-                             (or (check-up i j) 0)
-                             (or (check-up-right i j) 0)
-                             (or (check-up-left i j) 0)
-                             (or (check-down-right i j) 0)
-                             (or (check-down-left i j) 0))))
+                (let ((result (+ (or (check-right i j) 0)
+                                 (or (check-left i j) 0)
+                                 (or (check-down i j) 0)
+                                 (or (check-up i j) 0)
+                                 (or (check-up-right i j) 0)
+                                 (or (check-up-left i j) 0)
+                                 (or (check-down-right i j) 0)
+                                 (or (check-down-left i j) 0))))
                   (setf count (+ count result)))))))
     count))
 
 ;; PART 2
-
 (defmacro define-check-pair-function (name positions)
   `(defun ,name (i j char)
      (when (and
-            ,@(mapcar (lambda (pos) (list 'valid-index
-                                (list '+ 'i (car pos))
-                                (list '+ 'j (cadr pos))))
-                  positions)
-            ,@(mapcar (lambda (pos) (list 'equal
-                                (list 'aref '*grid*
-                                (list '+ 'i (car pos))
-                                (list '+ 'j (cadr pos)))
-                              'char))
+            ,@(mapcan (lambda (pos)
+                        `((valid-index (+ i ,(car pos)) (+ j ,(cadr pos)))
+                          (equal (aref *grid* (+ i ,(car pos)) (+ j ,(cadr pos))) char)))
                   positions))
            1)))
+
 
 (define-check-pair-function check-NW-NE ((-1 -1) (-1 1)))
 (define-check-pair-function check-NE-SE ((-1 1) (1 1)))
