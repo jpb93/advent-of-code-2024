@@ -1,4 +1,6 @@
-(ql:quickload "cl-ppcre")
+(in-package :advent-of-code.day3)
+
+(defparameter *puzzle-input* #p"./day3/input.txt")
 
 (defun read-file-as-string (file-name)
   (with-open-file (stream file-name :direction :input)
@@ -19,7 +21,7 @@
     (* num1 num2)))
 
 (defun solution-1 ()
-  (let ((input (find-mul-expressions (read-file-as-string "input.txt"))))
+  (let ((input (find-mul-expressions (read-file-as-string *puzzle-input*))))
     (apply #'+ (mapcar #'eval-mul-expression input))))
 
 ;; solution 2
@@ -27,7 +29,7 @@
   (cl-ppcre:regex-replace-all "(?s)don't\\(\\)(.*?)(do\\(\\)|$)" string ""))
 
 (defun solution-2 ()
-  (let* ((input-string (read-file-as-string "input.txt"))
+  (let* ((input-string (read-file-as-string *puzzle-input*))
          (valid-blocks (filter-disabled-blocks input-string))
          (mul-expressions (find-mul-expressions valid-blocks))
          (results (mapcar #'eval-mul-expression mul-expressions)))

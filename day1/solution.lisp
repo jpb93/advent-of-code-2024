@@ -1,5 +1,6 @@
-;; Day 1 Part 1
-(ql:quickload "cl-ppcre")
+(in-package :advent-of-code.day1)
+
+(defparameter *puzzle-input* #p"./day1/input.txt")
 
 (defun collect-lines (file-name)
   (with-open-file (stream file-name :direction :input)
@@ -24,14 +25,14 @@
         (y (parse-integer (second pair))))
     (abs (- x y))))
 
-(defun solution ()
-  (let* ((list-items (collect-lines "input.txt"))
+(defun solution-1 ()
+  (let* ((list-items (collect-lines *puzzle-input*))
          (pairs (transpose (sort-lists (transpose (mapcar #'split-list list-items))))))
     (apply #'+ (mapcar #'pair-diff pairs))))
 
 ;; Day 1 Part 2
 (defun solution-2 ()
-  (let* ((list-items (collect-lines "input.txt"))
+  (let* ((list-items (collect-lines *puzzle-input*))
          (two-lists (transpose (mapcar #'split-list list-items)))
          (left-list (first two-lists))
          (right-list (second two-lists))

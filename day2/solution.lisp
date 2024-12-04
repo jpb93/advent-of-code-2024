@@ -1,4 +1,6 @@
-(ql:quickload "cl-ppcre")
+(in-package :advent-of-code.day2)
+
+(defparameter *puzzle-input* #p"./day2/input.txt")
 
 (defun collect-lines (file-name)
   (with-open-file (stream file-name :direction :input)
@@ -38,7 +40,7 @@
        (within-range row)))
 
 (defun solution-1 ()
-  (let* ((rows (parse-puzzle-input "input.txt"))
+  (let* ((rows (parse-puzzle-input *puzzle-input*))
          (safety-status (mapcar #'(lambda (row)
                                     (if (safe-row row)
                                         1
@@ -55,7 +57,7 @@
   (some #'safe-row rows))
 
 (defun solution-2 ()
-  (let* ((rows (parse-puzzle-input "input.txt"))
+  (let* ((rows (parse-puzzle-input *puzzle-input*))
          (safety-status (mapcar #'(lambda (row)
                                     (let ((dampened-rows (list-remove-1 row)))
                                       (if (dampener-success-p dampened-rows)
