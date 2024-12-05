@@ -68,8 +68,8 @@
   `(defun ,name (i j char)
      (when (and
             ,@(mapcan (lambda (pos)
-                        `((valid-index (+ i ,(car pos)) (+ j ,(cadr pos)))
-                          (equal (aref *grid* (+ i ,(car pos)) (+ j ,(cadr pos))) char)))
+                        `((valid-index (+ i ,(first pos)) (+ j ,(second pos)))
+                          (equal (aref *grid* (+ i ,(first pos)) (+ j ,(second pos))) char)))
                   positions))
            1)))
 
