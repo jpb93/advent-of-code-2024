@@ -37,40 +37,30 @@
 (defun valid-index (i j)
   (and (>= i 0) (>= j 0) (< i *rows*) (< j *cols*)))
 
-(defmacro define-check-function (name delta-i delta-j)
-  `(defun ,name (i j)
-     (when (valid-index (+ i (* ,delta-i 3)) (+ j (* ,delta-j 3)))
-           (let ((result (list
-                          (aref *grid* i j)
-                          (aref *grid* (+ i (* ,delta-i 1)) (+ j (* ,delta-j 1)))
-                          (aref *grid* (+ i (* ,delta-i 2)) (+ j (* ,delta-j 2)))
-                          (aref *grid* (+ i (* ,delta-i 3)) (+ j (* ,delta-j 3))))))
-             (if (equal result '(X M A S)) 1 0)))))
-
-(define-check-function check-right 0 1)
-(define-check-function check-left 0 -1)
-(define-check-function check-down 1 0)
-(define-check-function check-up -1 0)
-(define-check-function check-up-right -1 1)
-(define-check-function check-up-left -1 -1)
-(define-check-function check-down-right 1 1)
-(define-check-function check-down-left 1 -1)
+(defun check-path (i j delta-i delta-j)
+  (when (valid-index (+ i (* delta-i 3)) (+ j (* delta-j 3)))
+        (let ((result (list
+                       (aref *grid* i j)
+                       (aref *grid* (+ i (* delta-i 1)) (+ j (* delta-j 1)))
+                       (aref *grid* (+ i (* delta-i 2)) (+ j (* delta-j 2)))
+                       (aref *grid* (+ i (* delta-i 3)) (+ j (* delta-j 3))))))
+          (if (equal result '(X M A S)) 1 0))))
 
 (defun solution-1 ()
   (let ((count 0))
     (destructuring-bind (n m) (array-dimensions *grid*)
       (loop for i from 0 below n do
-        (loop for j from 0 below m do
-          (when (equal (aref *grid* i j) 'X)
-                (let ((result (+ (or (check-right i j) 0)
-                                 (or (check-left i j) 0)
-                                 (or (check-down i j) 0)
-                                 (or (check-up i j) 0)
-                                 (or (check-up-right i j) 0)
-                                 (or (check-up-left i j) 0)
-                                 (or (check-down-right i j) 0)
-                                 (or (check-down-left i j) 0))))
-                  (setf count (+ count result)))))))
+              (loop for j from 0 below m do
+                      (when (equal (aref *grid* i j) 'X)
+                            (let ((result (+ (or (check-path i j 0 1) 0)
+                                             (or (check-path i j 0 -1) 0)
+                                             (or (check-path i j 1 0) 0)
+                                             (or (check-path i j -1 0) 0)
+                                             (or (check-path i j -1 1) 0)
+                                             (or (check-path i j -1 -1) 0)
+                                             (or (check-path i j 1 1) 0)
+                                             (or (check-path i j 1 -1) 0))))
+                              (setf count (+ count result)))))))
     count))
 
 ;; PART 2
@@ -83,21 +73,23 @@
                   positions))
            1)))
 
-
 (define-check-pair-function check-NW-NE ((-1 -1) (-1 1)))
 (define-check-pair-function check-NE-SE ((-1 1) (1 1)))
 (define-check-pair-function check-SE-SW ((1 1) (1 -1)))
 (define-check-pair-function check-SW-NW ((1 -1) (-1 -1)))
 
+(defun check-pair (f g i j)
+  (if (and (funcall f i j 'M) (funcall g i j 'S)) 1 0))
+
 (defun solution-2 ()
   (let ((count 0))
     (destructuring-bind (n m) (array-dimensions *grid*)
       (loop for i from 0 below n do
-        (loop for j from 0 below m do
-          (when (equal (aref *grid* i j) 'A)
-                (let ((result (+ (if (and (check-NW-NE i j 'M) (check-SE-SW i j 'S)) 1 0)
-                                 (if (and (check-NE-SE i j 'M) (check-SW-NW i j 'S)) 1 0)
-                                 (if (and (check-SE-SW i j 'M) (check-NW-NE i j 'S)) 1 0)
-                                 (if (and (check-SW-NW i j 'M) (check-NE-SE i j 'S)) 1 0))))
-                  (setf count (+ count result)))))))
+              (loop for j from 0 below m do
+                      (when (equal (aref *grid* i j) 'A)
+                            (let ((result (+ (check-pair #'check-NW-NE #'check-SE-SW i j)
+                                             (check-pair #'check-NE-SE #'check-SW-NW i j)
+                                             (check-pair #'check-SE-SW #'check-NW-NE i j)
+                                             (check-pair #'check-SW-NW #'check-NE-SE i j))))
+                              (setf count (+ count result)))))))
     count))
