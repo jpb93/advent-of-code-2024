@@ -14,4 +14,6 @@
    (:module "day3"
      :components ((:file "solution")))
    (:module "day4"
+     :components ((:file "solution")))
+   (:module "day5"
      :components ((:file "solution")))))

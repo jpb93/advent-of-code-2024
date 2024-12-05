@@ -17,5 +17,8 @@
 (defpackage :advent-of-code.day4
   (:use :cl :advent-of-code)
   (:export))
+(defpackage :advent-of-code.day5
+  (:use :cl :advent-of-code)
+  (:export))
 
 (in-package :advent-of-code)
