@@ -43,7 +43,6 @@
 
 (defparameter *input* #p"./day6/input.txt")
 
-(defparameter *open-space* #\.)
 (defparameter *obstacle* #\#)
 (defparameter *guard-start* #\^)
 
@@ -74,23 +73,27 @@
       (:west :north)
       (otherwise (error "Invalid direction")))))
 
+(defun out-of-bounds (grid x y)
+  (or (< x 0)
+      (< y 0)
+      (>= x (array-dimension grid 0))
+      (>= y (array-dimension grid 1))))
+
 (defun look-ahead (grid current-position direction)
   (destructuring-bind (x . y) current-position
-    (let ((nx (case direction
+    (let ((dx (case direction
                 (:north (1- x))
                 (:south (1+ x))
                 (:east x)
                 (:west x)))
-          (ny (case direction
+          (dy (case direction
                 (:north y)
                 (:south y)
                 (:east (1+ y))
                 (:west (1- y)))))
-      (if (or (< nx 0) (< ny 0)
-              (>= nx (array-dimension grid 0))
-              (>= ny (array-dimension grid 1)))
+      (if (out-of-bounds grid dx dy)
           nil
-          (aref grid nx ny)))))
+          (aref grid dx dy)))))
 
 (defun next-pos-open (grid current-position direction)
   (let ((ch (look-ahead grid current-position direction)))
@@ -100,10 +103,7 @@
 (defun guard-out-of-bounds (grid guard)
   (let ((x (guard-x guard))
         (y (guard-y guard)))
-    (or (< x 0)
-        (< y 0)
-        (>= x (array-dimension grid 0))
-        (>= y (array-dimension grid 1)))))
+        (out-of-bounds grid x y)))
 
 (defun compute-next-move (grid guard)
   (let ((pos (pos->coord guard))
