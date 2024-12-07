@@ -3,7 +3,7 @@
   :version "0.1"
   :author "Jay Burkhardt - jeremy.burkhardt@gmail.com"
   :license "MIT"
-  :depends-on (#:cl-ppcre #:uiop)
+  :depends-on (#:cl-ppcre #:uiop #:split-sequence)
   :serial t
   :components
   ((:file "packages")
