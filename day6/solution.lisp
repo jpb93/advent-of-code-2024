@@ -49,13 +49,17 @@
 (defparameter *guard* (make-guard))
 (defparameter *grid* (parse-grid-to-array *input*))
 
-(defun find-guard ()
-  (loop for i from 0 below (array-dimension *grid* 0)
-        do (loop for j from 0 below (array-dimension *grid* 1)
-                 do (when (equal (aref *grid* i j) *guard-start*)
-                          (set-guard-pos *guard* (cons i j))
-                          (print (cons i j))
-                          (return)))))
+(defun find-start-index ()
+  (let ((result nil))
+    (loop for i from 0 below (array-dimension *grid* 0)
+          do (loop for j from 0 below (array-dimension *grid* 1)
+                   do (when (equal (aref *grid* i j) *guard-start*)
+                            (setf result (cons i j)))))
+    result))
+
+(defun move-guard-to-start ()
+  (let ((start (find-start-index)))
+    (set-guard-pos *guard* start)))
 
 (defun move-guard (guard)
   (case (guard-direction guard)
@@ -103,7 +107,7 @@
 (defun guard-out-of-bounds (grid guard)
   (let ((x (guard-x guard))
         (y (guard-y guard)))
-        (out-of-bounds grid x y)))
+    (out-of-bounds grid x y)))
 
 (defun compute-next-move (grid guard)
   (let ((pos (pos->coord guard))
@@ -115,16 +119,63 @@
 (defparameter *visited-locations* (make-hash-table :test #'equal))
 
 (defun add-current-location (guard)
-  (setf (gethash (pos->coord guard) *visited-locations*) t))
+  (let ((coord (pos->coord guard)))
+    (if (and (typep coord 'cons)
+             (integerp (car coord))
+             (integerp (cdr coord)))
+        (setf (gethash coord *visited-locations*) t)
+        (format t "Invalid location detected during addition: ~a~%" coord))))
 
 (defun count-visited-locations ()
   (hash-table-count *visited-locations*))
 
 (defun solution-1 ()
-  (find-guard)
+  (move-guard-to-start)
   (loop while (not (guard-out-of-bounds *grid* *guard*))
         do (progn
             (add-current-location *guard*)
             (compute-next-move *grid* *guard*)))
-  (format t "Visited locations: ~a" (count-visited-locations))
-  (setf *visited-locations* nil))
+  (format t "Visited locations: ~a" (count-visited-locations)))
+
+;; PART 2
+(defparameter *slow-guard* (make-guard))
+(defparameter *fast-guard* (make-guard))
+
+(defun initialize-guards ()
+  (let ((start (find-start-index)))
+    (setf *slow-guard* (make-guard :x (car start) :y (cdr start)))
+    (setf *fast-guard* (make-guard :x (car start) :y (cdr start)))))
+
+
+(defun check-cycle (slow-guard fast-guard)
+  (and (= (guard-x slow-guard) (guard-x fast-guard))
+       (= (guard-y slow-guard) (guard-y fast-guard))
+       (equal (guard-direction slow-guard) (guard-direction fast-guard))))
+
+(defun compute-all-locations ()
+  (move-guard-to-start)
+  (loop while (not (guard-out-of-bounds *grid* *guard*))
+        do (progn
+            (add-current-location *guard*)
+            (compute-next-move *grid* *guard*))))
+
+(defun solution-2 ()
+  (compute-all-locations)
+  (let ((cycle-count 0))
+    (loop for coord being the hash-keys of *visited-locations*
+          do (unless (equal coord (find-start-index))
+               (let* ((x (car coord))
+                      (y (cdr coord))
+                      (original-char (aref *grid* x y)))
+                 (initialize-guards)
+                 (setf (aref *grid* x y) *obstacle*)
+                 (loop while (not (guard-out-of-bounds *grid* *slow-guard*))
+                       do (progn
+                           (compute-next-move *grid* *slow-guard*)
+                           (compute-next-move *grid* *fast-guard*)
+                           (compute-next-move *grid* *fast-guard*)
+                           (when (check-cycle *slow-guard* *fast-guard*)
+                                 (incf cycle-count)
+                                 (return))))
+                 (setf (aref *grid* x y) original-char))))
+    (format t "Number of cycles: ~a~%" cycle-count)))

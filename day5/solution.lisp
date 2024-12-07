@@ -12,7 +12,7 @@
           collect line)))
 
 (defun create-rule-table (lines)
-  (let ((page-rules (make-hash-table)))
+  (let ((page-rules (make-hash-table :test #'equal)))
     (loop for line in lines
           for (page-num-str rule-str) = (split-sequence:split-sequence #\| line)
           for page-num = (parse-integer page-num-str)
@@ -62,32 +62,32 @@
     (sum-middle-elements correct-pages)))
 
 ;; PART 2
-(defun violates-rule (current-page before-page)
-  (let ((page-rules (gethash current-page *rules*)))
-    (and page-rules (member before-page page-rules))))
+(defun all-nodes ()
+  (loop for key being the hash-keys of *rules*
+        collect key))
 
-(defun correct-page (page)
-  (let ((corrected-page '()))
-    (dolist (current-page page)
-      (let ((inserted nil))
-        (loop for pos from 0 upto (length corrected-page)
-              do (let ((pages-before (subseq corrected-page 0 pos))
-                       (pages-after (subseq corrected-page pos)))
-                   (if (and (every #'(lambda (before-page)
-                                       (in-correct-position current-page (list before-page)))
-                              pages-before)
-                            (every #'(lambda (after-page)
-                                       (in-correct-position after-page (list current-page)))
-                              pages-after))
-                       (progn
-                        (setf corrected-page
-                          (append pages-before (list current-page) pages-after))
-                        (setf inserted t)
-                        (return)))))
-        (unless inserted
-          (push current-page corrected-page))))
-    (nreverse corrected-page)))
+(defun compute-in-degrees ()
+  (let* ((nodes (all-nodes))
+         (flattened-neighbors (mapcan #'(lambda (x) (gethash x *rules*)) nodes))
+         (in-degree (make-hash-table :test #'equal)))
+      (dolist (node nodes)
+        (setf (gethash node in-degree) (count node flattened-neighbors)))
+        in-degree))
 
-(defun solution-2 ()
-  (let ((corrected-pages (mapcar #'correct-page (set-difference *pages* (get-correct-pages)))))
-    (sum-middle-elements corrected-pages)))
+(defun print-hash-table (hash-table)
+  (maphash (lambda (k v)
+             (format t "~a -> ~a~%" k v))
+           hash-table)
+           
+           'done)
+
+(let ((keys (list 66 14 95 31 32 13 52 21 34 48 75 59 57 87 73 89 42 22 82 67 77 92 79 84
+                  64 19 98 94 47 54 91 46 76 68 72 85 25 37 36 78 74 63 93 81 17 38 29 49 44))
+      (values-acc (make-hash-table :test #'equal)))
+  (dolist (k keys)
+    (dolist (v (gethash k *rules*))
+      (setf (gethash v values-acc) t)))
+  (dolist (k keys)
+    ; (print k)
+    (unless (gethash k values-acc)
+      (format t "Key ~A never appears as a value.~%" k))))
