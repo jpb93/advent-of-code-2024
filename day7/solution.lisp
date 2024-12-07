@@ -34,11 +34,19 @@
           (result-evals-p total (rest terms) (first terms) t))
         (t
           (or (result-evals-p total (rest terms) (+ current (first terms)) t)
+              ;; PART 2
+              (result-evals-p total (rest terms) (concat-integers current (first terms)) t)
+              ;;
               (and (not (zerop (first terms)))
                    (result-evals-p total (rest terms) (* current (first terms)) t))))))
 
-(defun solution-1 ()
+(defun solution ()
   (let* ((parsed-input (parse-input-file *puzzle-input*))
          (safe-lines (remove-if-not #'(lambda (line) (result-evals-p (first line) (second line))) parsed-input)))
     (apply #'+ (mapcar #'car safe-lines))))
-    
+
+
+;; PART 2
+(defun concat-integers (&rest integers)
+  (parse-integer (apply #'concatenate 'string (mapcar #'write-to-string integers))))
+
