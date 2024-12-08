@@ -25,28 +25,32 @@
   (let ((lines (read-lines-from-file filename)))
     (parse-puzzle-input lines)))
 
-(defun result-evals-p (total terms &optional (current nil) (started nil))
-  (cond ((null terms)
-          (if started
-              (equal current total)
-              (equal total 0)))
-        ((not started)
-          (result-evals-p total (rest terms) (first terms) t))
-        (t
-          (or (result-evals-p total (rest terms) (+ current (first terms)) t)
-              ;; PART 2
-              (result-evals-p total (rest terms) (concat-integers current (first terms)) t)
-              ;;
-              (and (not (zerop (first terms)))
-                   (result-evals-p total (rest terms) (* current (first terms)) t))))))
+(defun check-path (current remaining total)
+  (if (null remaining)
+      (equal current total)
+      (progn
+       (let ((next-term (first remaining))
+             (rest-terms (rest remaining)))
+         (or
+          (check-path (+ current next-term) rest-terms total)
+          (check-path (* current next-term) rest-terms total)
+          ;; for part 2
+          (check-path (concat-integers current next-term) rest-terms total))))))
+
+
+(defun result-evals-p (total terms)
+  (if (null terms)
+      (equal total 0)
+      (check-path (first terms) (rest terms) total)))
+
 
 (defun solution ()
   (let* ((parsed-input (parse-input-file *puzzle-input*))
-         (safe-lines (remove-if-not #'(lambda (line) (result-evals-p (first line) (second line))) parsed-input)))
+         (safe-lines (remove-if-not #'(lambda (line)
+                                        (result-evals-p (first line) (second line)))
+                       parsed-input)))
     (apply #'+ (mapcar #'car safe-lines))))
-
 
 ;; PART 2
 (defun concat-integers (&rest integers)
   (parse-integer (apply #'concatenate 'string (mapcar #'write-to-string integers))))
-
