@@ -34,16 +34,16 @@
          (or
           (has-solution-p (+ current next-term) rest-terms total)
           (has-solution-p (* current next-term) rest-terms total)
-          ;; for part 2
           (has-solution-p (concat-integers current next-term) rest-terms total))))))
+
+(defun check-line (line)
+  (let ((terms (second line))
+        (total (first line)))
+    (has-solution-p (first terms) (rest terms) total)))
 
 (defun solution ()
   (let* ((parsed-input (parse-input-file *puzzle-input*))
-         (safe-lines (remove-if-not #'(lambda (line)
-                                        (let ((terms (second line))
-                                              (total (first line)))
-                                          (has-solution-p (first terms) (rest terms) total)))
-                       parsed-input)))
+         (safe-lines (remove-if-not #'check-line parsed-input)))
     (apply #'+ (mapcar #'car safe-lines))))
 
 ;; PART 2
