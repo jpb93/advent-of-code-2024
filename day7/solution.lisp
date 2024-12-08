@@ -25,29 +25,24 @@
   (let ((lines (read-lines-from-file filename)))
     (parse-puzzle-input lines)))
 
-(defun check-path (current remaining total)
+(defun has-solution-p (current remaining total)
   (if (null remaining)
       (equal current total)
       (progn
        (let ((next-term (first remaining))
              (rest-terms (rest remaining)))
          (or
-          (check-path (+ current next-term) rest-terms total)
-          (check-path (* current next-term) rest-terms total)
+          (has-solution-p (+ current next-term) rest-terms total)
+          (has-solution-p (* current next-term) rest-terms total)
           ;; for part 2
-          (check-path (concat-integers current next-term) rest-terms total))))))
-
-
-(defun result-evals-p (total terms)
-  (if (null terms)
-      (equal total 0)
-      (check-path (first terms) (rest terms) total)))
-
+          (has-solution-p (concat-integers current next-term) rest-terms total))))))
 
 (defun solution ()
   (let* ((parsed-input (parse-input-file *puzzle-input*))
          (safe-lines (remove-if-not #'(lambda (line)
-                                        (result-evals-p (first line) (second line)))
+                                        (let ((terms (second line))
+                                              (total (first line)))
+                                          (has-solution-p (first terms) (rest terms) total)))
                        parsed-input)))
     (apply #'+ (mapcar #'car safe-lines))))
 
