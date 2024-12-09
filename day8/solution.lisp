@@ -63,14 +63,6 @@
                          when (char= char (aref grid i j))
                        collect (cons i j))))
 
-(defparameter *all-points*
-              (mapcar (lambda (c)
-                        (cons c (get-char-positions *grid* c)))
-                  (get-unique-chars *grid*)))
-
-(defun position-list (node)
-  (rest node))
-
 (defun get-all-pairs (points)
   (loop for i from 0 below (length points)
         for p1 = (nth i points)
@@ -85,7 +77,9 @@
 
 (defun solution-1 ()
   (let* ((unique-points (make-hash-table :test #'equal))
-         (all-coordinates (mapcar #'position-list *all-points*))
+         (all-points (mapcar #'(lambda (c) (get-char-positions *grid* c))
+                       (get-unique-chars *grid*)))
+         (all-coordinates all-points)
          (all-pairs (mapcar #'get-all-pairs all-coordinates))
          (all-antinodes (collect-antinodes all-pairs)))
     (loop for p in all-antinodes do (setf (gethash p unique-points) t))
