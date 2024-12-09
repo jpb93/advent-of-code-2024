@@ -84,3 +84,41 @@
          (all-antinodes (collect-antinodes all-pairs)))
     (loop for p in all-antinodes do (setf (gethash p unique-points) t))
     (format t "There are ~a antinodes~%" (hash-table-count unique-points))))
+
+;; PART 2
+
+(defun generate-points (p1 step-x step-y direction)
+  (loop for i from 0
+        for point = (cons (+ (car p1) (* i step-x direction))
+                          (+ (cdr p1) (* i step-y direction)))
+        while (not (out-of-bounds point))
+        collect point))
+
+(defun generate-bounded-lattice-points (p1 p2)
+  (let* ((x1 (car p1))
+         (y1 (cdr p1))
+         (x2 (car p2))
+         (y2 (cdr p2))
+         (dx (- x2 x1))
+         (dy (- y2 y1))
+         (g (gcd (abs dx) (abs dy)))
+         (step-x (/ dx g))
+         (step-y (/ dy g)))
+    (append (generate-points p1 step-x step-y -1)
+            (generate-points p1 step-x step-y +1))))
+
+
+(defun all-line-eqs (node-pairs)
+  (mapcan #'(lambda (p)
+              (mapcan #'(lambda (q) (generate-bounded-lattice-points (car q) (cadr q))) p))
+    node-pairs))
+
+(defun solution-2 ()
+  (let* ((unique-points (make-hash-table :test #'equal))
+         (all-points (mapcar #'(lambda (c) (get-char-positions *grid* c))
+                       (get-unique-chars *grid*)))
+         (all-coordinates all-points)
+         (all-pairs (mapcar #'get-all-pairs all-coordinates))
+         (line-eqs (all-line-eqs all-pairs)))
+    (loop for p in line-eqs do (setf (gethash p unique-points) t))
+    (format t "There are ~a antinodes~%" (hash-table-count unique-points))))
