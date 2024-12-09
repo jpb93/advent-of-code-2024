@@ -8,14 +8,18 @@
   :components
   ((:file "packages")
    (:module "day1"
-     :components ((:file "solution")))
+            :components ((:file "solution")))
    (:module "day2"
-     :components ((:file "solution")))
+            :components ((:file "solution")))
    (:module "day3"
-     :components ((:file "solution")))
+            :components ((:file "solution")))
    (:module "day4"
-     :components ((:file "solution")))
+            :components ((:file "solution")))
    (:module "day5"
-     :components ((:file "solution")))
+            :components ((:file "solution")))
    (:module "day6"
-     :components ((:file "solution")))))
+            :components ((:file "solution")))
+   (:module "day7"
+            :components ((:file "solution")))
+   (:module "day8"
+            :components ((:file "solution")))))

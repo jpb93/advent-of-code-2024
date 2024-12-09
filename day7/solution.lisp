@@ -49,3 +49,4 @@
 ;; PART 2
 (defun concat-integers (&rest integers)
   (parse-integer (apply #'concatenate 'string (mapcar #'write-to-string integers))))
+

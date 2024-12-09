@@ -29,5 +29,8 @@
 (defpackage :advent-of-code.day7
   (:use :cl :advent-of-code)
   (:export))
+(defpackage :advent-of-code.day8
+  (:use :cl :advent-of-code)
+  (:export))
 
 (in-package :advent-of-code)
